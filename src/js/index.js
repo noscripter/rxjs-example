@@ -1,5 +1,5 @@
 import 'normalize.css';
-import Rx from 'rx';
+import Rx from 'rxjs';
 import {
   getRepos,
   getUser
@@ -14,10 +14,10 @@ const showUserInfo = ($dom, data) => {
   $dom.html(userTemplate(data));
 };
 
-const userInfoSteam = ($repos) => {
+const userInfoStream = ($repos) => {
   const $avator = $repos.find('.user_header');
   const avatorMouseoverObservable = Rx.Observable.fromEvent($avator, 'mouseover')
-    .debounce(500)
+    .debounceTime(500)
     .takeWhile((e) => {
       const $infosWrapper = $(e.target).parent().find('.user_infos_wrapper');
       return $infosWrapper.find('.infos_container').length === 0;
@@ -30,7 +30,7 @@ const userInfoSteam = ($repos) => {
       }
     })
     .filter((data) => !!data.url)
-    .flatMapLatest(getUser)
+    .switchMap(getUser)
     .do((result) => {
       const {data, conatiner} = result;
       showUserInfo(conatiner, data);
@@ -43,19 +43,25 @@ $(() => {
   const $conatiner = $('.content_container');
   const $input = $('.search');
   const observable = Rx.Observable.fromEvent($input, 'keyup')
-    .debounce(400)
+    .debounceTime(400)
     .map(() => $input.val().trim())
     .filter((text) => !!text)
     .distinctUntilChanged()
-    .flatMapLatest(getRepos)
-    .do((results) => $conatiner.html(''))
-    .flatMap((results) => Rx.Observable.from(results))
+    .switchMap(text => {
+      return getRepos(text);
+    })
+    .do((results) => {
+      $conatiner.html('');
+    })
+    .flatMap(results => {
+      return Rx.Observable.from(results);
+    })
     .map((repos) => $(reposTemplate(repos)))
     .do(($repos) => {
       $conatiner.append($repos);
     })
     .flatMap(($repos) => {
-      return userInfoSteam($repos);
+      return userInfoStream($repos);
     });
 
   observable.subscribe(() => {

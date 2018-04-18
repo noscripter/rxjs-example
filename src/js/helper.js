@@ -1,4 +1,4 @@
-import Rx from 'rx';
+import Rx from 'rxjs';
 import { polyfill } from 'es6-promise';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
