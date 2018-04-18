@@ -77,5 +77,8 @@ module.exports = {
   debug: true,
   displayErrorDetails: true,
   outputPathinfo: true,
-  devtool: "cheap-module-eval-source-map"
+  devtool: "cheap-module-eval-source-map",
+  devServer: {
+    port: process.env.PORT || 9999
+  }
 };
