@@ -43,7 +43,6 @@ $(() => {
   const $conatiner = $('.content_container');
   const $input = $('.search');
   const observable = Rx.Observable.fromEvent($input, 'keyup')
-    .debounceTime(400)
     .map(() => $input.val().trim())
     .filter((text) => {
       const r = /[a-z]|[A-Z]|\d|[-_]/g;
@@ -56,6 +55,7 @@ $(() => {
       $input.val(v);
       return !!text && r.test(text);
     })
+    .debounceTime(400)
     .distinctUntilChanged()
     .switchMap(text => {
       return getRepos(text);
