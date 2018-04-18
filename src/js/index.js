@@ -45,7 +45,17 @@ $(() => {
   const observable = Rx.Observable.fromEvent($input, 'keyup')
     .debounceTime(400)
     .map(() => $input.val().trim())
-    .filter((text) => !!text)
+    .filter((text) => {
+      const r = /[a-z]|[A-Z]|\d|[-_]/g;
+      const matches = text.match(r);
+      let v = '';
+      if (matches) {
+        v = matches.join('');
+      }
+      console.log(v);
+      $input.val(v);
+      return !!text && r.test(text);
+    })
     .distinctUntilChanged()
     .switchMap(text => {
       return getRepos(text);
