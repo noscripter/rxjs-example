@@ -14,25 +14,25 @@ const showUserInfo = ($dom, data) => {
   $dom.html(userTemplate(data));
 };
 
-const userInfoStream = ($repos) => {
+const userInfoStream = $repos => {
   const $avator = $repos.find('.user_header');
   const avatorMouseoverObservable = Rx.Observable.fromEvent($avator, 'mouseover')
     .debounceTime(500)
-    .takeWhile((e) => {
+    .takeWhile(e => {
       const $infosWrapper = $(e.target).parent().find('.user_infos_wrapper');
       return $infosWrapper.find('.infos_container').length === 0;
     })
-    .map((e) => {
+    .map(e => {
       const $infosWrapper = $(e.target).parent().find('.user_infos_wrapper');
       return {
         conatiner: $infosWrapper,
         url: $(e.target).attr('data-api')
-      }
+      };
     })
-    .filter((data) => !!data.url)
+    .filter(data => !!data.url)
     .switchMap(getUser)
-    .do((result) => {
-      const {data, conatiner} = result;
+    .do(result => {
+      const { data, conatiner } = result;
       showUserInfo(conatiner, data);
     });
 
@@ -44,7 +44,7 @@ $(() => {
   const $input = $('.search');
   const observable = Rx.Observable.fromEvent($input, 'keyup')
     .map(() => $input.val().trim())
-    .filter((text) => {
+    .filter(text => {
       const r = /[a-z]|[A-Z]|\d|[-_]/g;
       const matches = text.match(r);
       let v = '';
@@ -60,23 +60,23 @@ $(() => {
     .switchMap(text => {
       return getRepos(text);
     })
-    .do((results) => {
+    .do(results => {
       $conatiner.html('');
     })
     .flatMap(results => {
       return Rx.Observable.from(results);
     })
-    .map((repos) => $(reposTemplate(repos)))
-    .do(($repos) => {
+    .map(repos => $(reposTemplate(repos)))
+    .do($repos => {
       $conatiner.append($repos);
     })
-    .flatMap(($repos) => {
+    .flatMap($repos => {
       return userInfoStream($repos);
     });
 
   observable.subscribe(() => {
     console.log('success');
-  }, (err) => {
+  }, err => {
     console.log(err);
   }, () => {
     console.log('completed');
